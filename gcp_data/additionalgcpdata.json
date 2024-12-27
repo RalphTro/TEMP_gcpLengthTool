@@ -1,0 +1,15 @@
+{
+    "GCPPrefixFormatList": {
+        "date": "2024-12-17T12:03:21.1927324Z",
+        "entry": [
+            {
+                "prefix": "000000",
+                "gcpLength": 7
+            },
+            {
+                "prefix": "000001",
+                "gcpLength": 7
+            }
+        ]
+    }
+}

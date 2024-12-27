@@ -193,7 +193,7 @@ body {
 	margin: 0px;
 }
 
-#div5 {
+#get-gcp {
 	display: flex;
 	position: absolute;
 	box-sizing: border-box;
@@ -357,13 +357,13 @@ body {
 	height: 16.19%;
 }
 
-#div31 {
+#giai {
 	top: 65.87%;
 	left: 52.53%;
 	width: 41.74%;
 }
 
-#div32 {
+#footer {
 	display: flex;
 	position: absolute;
 	box-sizing: border-box;

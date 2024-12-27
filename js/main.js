@@ -5,7 +5,7 @@ $(document).ready(function() {
 
 	});
 
-	$("#div5").on("click",function() {
+	$("#get-gcp").on("click",function() {
 
 	});
 
@@ -21,7 +21,7 @@ $(document).ready(function() {
 
 	});
 
-	$("#div31").on("click",function() {
+	$("#giai").on("click",function() {
 
 	});
 
