@@ -1,17 +1,25 @@
 $(document).ready(function () {
 	// when document loaded:
+
+	// Function to fetch the date of this tool's GCP JSON file
 	$.getJSON('gcp_data/gcpprefixformatlist.json', function (gs1Data) {
 		var fullDate = new Date(gs1Data.GCPPrefixFormatList.date);
-		var date = fullDate.toISOString().substring(0, 10);
-		console.log(date);
+		var options = { day: '2-digit', month: 'long', year: 'numeric' };
+		var date = fullDate.toLocaleDateString('en-GB', options).replace(/,/g, '');
+		// console.log(date);
 		$("#gs1-updated").html(date);
 	});
 
-	$.getJSON('gcp_data/additionalgcpdata.json', function (ownData) {
-		var fullDate = new Date(ownData.GCPPrefixFormatList.date);
-		var date = fullDate.toISOString().substring(0, 10);
-		console.log(date);
-		$("#own-updated").html(date);
+	// Function to fetch the date of the date when GS1's global GCP length table was updated
+	// NOTE: to prevent that the JSON file (Jan 2025: > 15 MB) itself must be loaded for this purpose, we only extract it from GS1's landing page 
+	$.ajax({
+		url: "https://api.allorigins.win/get?url=" + encodeURIComponent("https://www.gs1.org/standards/bc-epc-interop"),
+		success: function (response) {
+			var data = $(response.contents);
+			var date = data.find("#block-gsone-revamp-content .content article .bg-white .container .layout .col-md-12 .block .content div[property='schema:text'] p:contains('Updated') strong font i").text();
+			// console.log("Updated Date: " + date);
+			$("#global-gcp-date").html(date);
+		}
 	});
 
 	// Regular expressions for GS1 keys
@@ -50,69 +58,66 @@ $(document).ready(function () {
 		'8018': true
 	};
 
+	function getGCPLength(aI, gs1Key) {
+		try {
+			// Check if GS1 Key complies with its corresponding RegEx
+			if (!gs1KeyRegEx[aI].test(gs1Key)) {
+				throw new Error('The GS1 Key has an incorrect length or impermissible characters.');
+			}
+		} catch (error) {
+			return error.message;
+		}
+
+		// Variables storing identified gcp length and specifying prefix length/search string
+		let gcpLength = "";
+		let j = 12;
+
+		// Normalize input string so that function works consistently for all GS1 keys
+		if (keyStartsWithGCP[aI]) {
+			gs1Key = '0' + gs1Key;
+		}
+
+		// Check if there are matching 12-digit prefix values.
+		// If not, iterate further (i.e. decrease GCP length) until there is a match.
+		// Then, return corresponding GCP Length Value
+		while (j > 2 && !gcpLength) {
+			for (let i = 0; i < gcpDict.length; i++) {
+				if (gcpDict[i].prefix.length === j && gs1Key.substring(1, j + 1).includes(gcpDict[i].prefix)) {
+					gcpLength = gcpDict[i].gcpLength;
+					return gcpLength;
+				}
+			}
+			j -= 1;
+		}
+
+		if (!gcpLength) {
+			throw new Error('No matching value. Try Verified by GS1 (https://www.gs1.org/services/verified-by-gs1) or contact your local GS1 MO.');
+		}
+	}
+
 	// Load GCP Length Table data from local JSON file
 	fetch('gcp_data/gcpprefixformatlist.json')
 		.then(response => response.json())
 		.then(allGCPs => {
 			// Transform JSON structure into list of dictionaries
-			const gcpDict = allGCPs.GCPPrefixFormatList.entry;
+			gcpDict = allGCPs.GCPPrefixFormatList.entry;
 
-			function getGCPLength(aI, gs1Key) {
-				// Check if GS1 Key complies with its corresponding RegEx
-				if (!gs1KeyRegEx[aI].test(gs1Key)) {
-					throw new Error('The GS1 Key has an incorrect length or impermissible characters.');
-				}
-
-				// Variables storing identified gcp length and specifying prefix length/search string
-				let gcpLength = "";
-				let j = 12;
-
-				// Normalize input string so that function works consistently for all GS1 keys
-				if (keyStartsWithGCP[aI]) {
-					gs1Key = '0' + gs1Key;
-				}
-
-				// Check if there are matching 12-digit prefix values.
-				// If not, iterate further (i.e. decrease GCP length) until there is a match.
-				// Then, return corresponding GCP Length Value
-				while (j > 2 && !gcpLength) {
-					for (let i = 0; i < gcpDict.length; i++) {
-						if (gcpDict[i].prefix.length === j && gs1Key.substring(1, j + 1).includes(gcpDict[i].prefix)) {
-							gcpLength = gcpDict[i].gcpLength;
-							return gcpLength;
-						}
-					}
-					j -= 1;
-				}
-
-				if (!gcpLength) {
-					throw new Error('There is no matching value. Try Verified by GS1 (https://www.gs1.org/services/verified-by-gs1) or contact local GS1 MO.');
-				}
-			}
-
-			// Example usage
-			try {
-				const gcpLength = getGCPLength('01', '04012345123456');
-				console.log('GCP Length:', gcpLength);
-			} catch (error) {
-				console.error(error.message);
-			}
 		})
 		.catch(error => console.error('Error loading JSON file:', error));
 
-	$("#input").on("mousedown", function () {
-		$("#input").css("background-color", "yellow");
-	});
-
 	$("#get-gcp").on("click", function () {
-		console.log($("#dropdown").val());
-		console.log($("#input").val());
-		$("#output").val(getGCPLength($("#dropdown").val(),$("#input").val()));
+		// console.log(getGCPLength($("#dropdown").val(), $("#input").val()))
+		try {
+			$("#output").html(getGCPLength($("#dropdown").val(), $("#input").val()).toString());
+		} catch (error) {
+			$("#output").html(error.message);
+		}
 	});
 
 	$("#clear").on("mousedown", function () {
 		$("#dropdown").val('');
 		$("#input").val('');
+		$("#output").html('');
 	});
 
 	$("#gtin").on("click", function () {
@@ -134,5 +139,24 @@ $(document).ready(function () {
 		$("#input").val('0425121832999XYZ');
 		$("#dropdown").val('8004');
 	});
+
+	$("#grai").on("click", function () {
+		$("#input").val('03870585000552987');
+		$("#dropdown").val('8003');
+	});
+
+	$("#itip").on("click", function () {
+		$("#input").val('095211411234540102');
+		$("#dropdown").val('8006');
+	});
+
+	$(".demo-button, #clear, #get-gcp").hover(
+		function () {
+			$(this).css("cursor", "pointer");
+		},
+		function () {
+			$(this).css("cursor", "default");
+		}
+	);
 
 });
