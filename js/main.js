@@ -80,7 +80,7 @@ $(document).ready(function () {
 
 		// Normalize further by removing any characters after a non-numeric character appears, if present
 		let firstNonNumericIndex = gs1Key.search(/\D/);
-		console.log('firstNonNumericIndex', firstNonNumericIndex)
+		// console.log('firstNonNumericIndex', firstNonNumericIndex)
 		if (firstNonNumericIndex !== -1) {
 			gs1Key = gs1Key.substring(0, firstNonNumericIndex);
 		}
