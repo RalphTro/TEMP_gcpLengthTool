@@ -72,9 +72,17 @@ $(document).ready(function () {
 		let gcpLength = "";
 		let j = 12;
 
-		// Normalize input string so that function works consistently for all GS1 keys
+		// Normalize leading zero so that function works consistently for all GS1 keys
 		if (keyStartsWithGCP[aI]) {
 			gs1Key = '0' + gs1Key;
+		}
+		//console.log('gs1Key: ', gs1Key);
+
+		// Normalize further by removing any characters after a non-numeric character appears, if present
+		let firstNonNumericIndex = gs1Key.search(/\D/);
+		console.log('firstNonNumericIndex', firstNonNumericIndex)
+		if (firstNonNumericIndex !== -1) {
+			gs1Key = gs1Key.substring(0, firstNonNumericIndex);
 		}
 
 		// Check if there are matching 12-digit prefix values.
@@ -136,7 +144,7 @@ $(document).ready(function () {
 	});
 
 	$("#giai").on("click", function () {
-		$("#input").val('0425121832999XYZ');
+		$("#input").val('425121832999XYZ');
 		$("#dropdown").val('8004');
 	});
 
