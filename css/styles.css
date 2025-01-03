@@ -161,9 +161,12 @@ body {
 #get-gcp {
 	display: flex;
 	position: absolute;
+	box-sizing: border-box;
+	align-items: center;
+	justify-content: center;
 	left: 2%;
 	width: 20.00%;
-	height: 3%;
+	height: 2.5%;
 	z-index: 9;
 	color: rgb(0, 0, 0);
 	overflow: hidden;
@@ -174,7 +177,7 @@ body {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 1.6vw;
 	padding: 20px;
-	margin: 0px;
+	margin: 10px;
 	user-select: none;
 }
 
