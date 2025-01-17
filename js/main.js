@@ -4,7 +4,7 @@ $(document).ready(function () {
 	// Function to fetch the date of this tool's GCP JSON file
 	$.getJSON('gcp_data/gcpprefixformatlist.json', function (gs1Data) {
 		var fullDate = new Date(gs1Data.GCPPrefixFormatList.date);
-		var options = { day: '2-digit', month: 'long', year: 'numeric' };
+		var options = { day: 'numeric', month: 'long', year: 'numeric' };
 		var date = fullDate.toLocaleDateString('en-GB', options).replace(/,/g, '');
 		// console.log(date);
 		$("#gs1-updated").html(date);
